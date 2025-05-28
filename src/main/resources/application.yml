@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: IDENTITY-SERVICE
+
+eureka:
+  client:
+    service-url:
+      defaultZone : http://localhost:8761/eureka/
+
+
+server:
+  port: 9898
+logging:
+  level:
+    org.springframework.ldap: DEBUG
+    org.springframework.security: DEBUG
