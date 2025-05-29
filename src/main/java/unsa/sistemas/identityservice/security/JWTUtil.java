@@ -10,13 +10,10 @@ import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
-import unsa.sistemas.identityservice.models.Role;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 
 @Component
@@ -55,41 +52,35 @@ public class JWTUtil {
 
 
     public String generateToken(UserDetails userDetails) {
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("role", userDetails.getAuthorities());
-        return doGenerateToken(claims, userDetails.getUsername());
+        return doGenerateToken(userDetails.getUsername());
     }
 
     public String generateRefreshToken(UserDetails userDetails) {
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("role", userDetails.getAuthorities());
-        return doGenerateRefreshToken(claims, userDetails.getUsername());
+        return doGenerateRefreshToken( userDetails.getUsername());
     }
 
-    private String doGenerateToken(Map<String, Object> claims, String subject) {
-        Header header = Jwts.header();
+    private String doGenerateToken(String subject) {
+        Header<?> header = Jwts.header();
         header.setType("JWT");
         return Jwts.builder()
                 .setHeader((Map<String, Object>) header)
-                .setClaims(claims)
                 .setSubject(subject)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationMs * 1000))
-                .signWith(SignatureAlgorithm.HS256, Base64.getEncoder().encode(jwtSecret.getBytes()))
+                .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationMs * 1000L))
+                .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
 
     // refresh token
-    private String doGenerateRefreshToken(Map<String, Object> claims, String subject) {
-        Header header = Jwts.header();
+    private String doGenerateRefreshToken( String subject) {
+        Header<?> header = Jwts.header();
         header.setType("JWT");
         return Jwts.builder()
                 .setHeader((Map<String, Object>) header)
-                .setClaims(claims)
                 .setSubject(subject)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationMs * 2 * 1000))
-                .signWith(SignatureAlgorithm.HS256, Base64.getEncoder().encode(jwtSecret.getBytes()))
+                .setExpiration(new Date(System.currentTimeMillis() + (long) jwtExpirationMs * 2 * 1000))
+                .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
 

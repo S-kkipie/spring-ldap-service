@@ -33,8 +33,11 @@ public class LdapAuthenticationProvider implements AuthenticationProvider {
         String username = token.getUsername();
         String password = token.getPassword();
         String organization = token.getOrganization();
-
-        String base = "ou=" + organization + ",ou=users";
+        String base = "";
+        if (organization != null && !organization.isBlank()) {
+            base += "ou=" + organization + ",";
+        }
+        base += "ou=appUsers,ou=users";
         String filter = "(mail=" + username + ")";
 
         List<DirContextOperations> result = ldapTemplate.search(
